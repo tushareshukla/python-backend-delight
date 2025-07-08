@@ -48,8 +48,9 @@ async def trigger_event_scrape(url: str, session_id: str):
             response.raise_for_status()
             result = response.json()
 
-            if not result.get("events"):
-                logger.warning(f"[EventScrape] No events found. Fallback to Playwright.")
+            # ✅ Trigger Playwright if response is null or empty dict
+            if not result or result is None or result == {}:
+                logger.warning(f"[EventScrape] Null or empty response. Fallback to Playwright.")
                 await playwright_event_scrape(url, session_id)
             else:
                 await get_mongo_collection("event_info").insert_one({
@@ -62,6 +63,7 @@ async def trigger_event_scrape(url: str, session_id: str):
         except Exception as e:
             logger.error(f"[EventScrape] Error: {e}")
 
+
 async def trigger_product_scrape(url: str, session_id: str):
     endpoint = f"{COLLY_MICROSERVICE_BASE_URL}/product-scrape"
     payload = {"url": url}
@@ -73,8 +75,9 @@ async def trigger_product_scrape(url: str, session_id: str):
             response.raise_for_status()
             result = response.json()
 
-            if not result.get("products"):
-                logger.warning(f"[ProductScrape] No products found. Fallback to Playwright.")
+            # ✅ Trigger Playwright only if `pages` is explicitly null
+            if result.get("pages") is None:
+                logger.warning(f"[ProductScrape] pages == null. Fallback to Playwright.")
                 await playwright_product_scrape(url, session_id)
             else:
                 await get_mongo_collection("product_info").insert_one({
@@ -86,3 +89,4 @@ async def trigger_product_scrape(url: str, session_id: str):
                 logger.info(f"[ProductScrape] Stored product result.")
         except Exception as e:
             logger.error(f"[ProductScrape] Error: {e}")
+

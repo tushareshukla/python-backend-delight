@@ -76,8 +76,8 @@ async def trigger_quick_scrape(url: str, session_id: str):
             response.raise_for_status()
             result = response.json()
 
-            if not result.get("page"):
-                logger.warning(f"[QuickScrape] No 'page' in response for {url}, falling back to Playwright")
+            if not result.get("pages") or not result["pages"]:
+                logger.warning(f"[QuickScrape] No 'pages' in response for {url}, falling back to Playwright")
                 await playwright_scrape_main_and_info_pages(url, session_id)
             else:
                 doc = {

@@ -61,9 +61,9 @@ async def run_task_pipeline(url: str, session_id: str, task: str) -> dict:
 
     combined_text = "\n\n".join(text_blocks)[:15000]
 
-    # Step 3: Append fallback hint if needed
-    if len(combined_text) < 1000 and task == "get_company_info":
-        combined_text += "\n\n[TOOL] Use SerpAPI to enrich if data insufficient."
+    # # Step 3: Append fallback hint if needed
+    # if len(combined_text) < 1000 and task == "get_company_info":
+    #     combined_text += "\n\n[TOOL] Use SerpAPI to enrich if data insufficient."
 
     # Step 4: Validate and run agent chain
     if task not in AGENT_MAPPING:

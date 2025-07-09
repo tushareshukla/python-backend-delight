@@ -3,6 +3,7 @@ from pydantic import BaseModel, HttpUrl
 class ValidationRequest(BaseModel):
     url: HttpUrl
 
-class OrgExtractionRequest(BaseModel):
-    url: str
+class TaskRequest(BaseModel):
+    url: HttpUrl
     session_id: str
+    task: str

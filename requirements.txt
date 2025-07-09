@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+httpx
+motor
+pymongo
+dnspython
+playwright
+langchain
+langchain-community
+openai
+python-dotenv
+pip

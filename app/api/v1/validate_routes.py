@@ -38,6 +38,7 @@ async def save_outputs(payload: AgentOutputBatchRequest):
 @router.get("/agent/output", tags=["Agent Output"])
 async def fetch_outputs(organization_id: str, company_url: str):
     try:
+        print(f"Fetching outputs for org: {organization_id}, url: {company_url}")
         return await get_outputs_by_org_and_url(organization_id, company_url)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

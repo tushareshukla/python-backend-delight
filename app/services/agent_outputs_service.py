@@ -1,15 +1,27 @@
-# agent_outputs_service.py
 from app.db.mongo_client import get_mongo_collection
 from datetime import datetime
 from bson import ObjectId
+from typing import Dict, Any
 
 COLLECTION_NAME = "organization_agent_outputs"
 
-from app.db.mongo_client import get_mongo_collection
-from datetime import datetime
-from bson import ObjectId
+def serialize_doc(doc: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Convert MongoDB-specific types to JSON-serializable format.
+    """
+    doc["_id"] = str(doc.get("_id", ""))
+    
+    if "organization_id" in doc and isinstance(doc["organization_id"], ObjectId):
+        doc["organization_id"] = str(doc["organization_id"])
 
-COLLECTION_NAME = "organization_agent_outputs"
+    if "created_at" in doc and hasattr(doc["created_at"], "isoformat"):
+        doc["created_at"] = doc["created_at"].isoformat()
+
+    if "updated_at" in doc and hasattr(doc["updated_at"], "isoformat"):
+        doc["updated_at"] = doc["updated_at"].isoformat()
+
+    return doc
+
 
 async def save_agent_outputs(payload):
     collection = get_mongo_collection(COLLECTION_NAME)
@@ -41,16 +53,22 @@ async def save_agent_outputs(payload):
             "upserted_id": str(op_result.upserted_id) if op_result.upserted_id else None
         })
 
-    return {"status": "success", "message": "Upsert complete", "details": results}
-
+    return {
+        "status": "success",
+        "message": "Upsert complete",
+        "details": results
+    }
 
 
 async def get_outputs_by_org_and_url(organization_id: str, company_url: str):
     collection = get_mongo_collection(COLLECTION_NAME)
 
-    docs = await collection.find({
+    query = {
         "organization_id": ObjectId(organization_id),
         "company_url": company_url
-    }).to_list(length=100)
+    }
 
-    return {"status": "success", "results": docs}
+    cursor = collection.find(query)
+    docs = await cursor.to_list(length=100)
+
+    return [serialize_doc(doc) for doc in docs] # type: ignore
